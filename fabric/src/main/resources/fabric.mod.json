@@ -21,6 +21,9 @@
   "entrypoints": {
     "client": [
       "io.github.ultreon.gdxminecraft.fabric.FabricGdxLauncher"
+    ],
+    "modmenu": [
+      "io.github.ultreon.gdxminecraft.fabric.ModMenuHandler"
     ]
   },
   "mixins": [

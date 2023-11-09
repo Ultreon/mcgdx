@@ -22,4 +22,10 @@ public interface Lwjgl3WindowAccessor {
     static Lwjgl3Window invokeInit(ApplicationListener listener, Lwjgl3ApplicationConfiguration config, Lwjgl3ApplicationBase application) {
         throw new AssertionError("Mixin failed to apply!");
     }
+
+    @Invoker
+    void invokeCreate(long windowHandle);
+
+    @Invoker
+    boolean invokeUpdate();
 }

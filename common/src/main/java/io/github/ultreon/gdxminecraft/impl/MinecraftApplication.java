@@ -2,92 +2,59 @@ package io.github.ultreon.gdxminecraft.impl;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.backends.lwjgl3.*;
-import com.badlogic.gdx.backends.lwjgl3.audio.Lwjgl3Audio;
-import com.badlogic.gdx.backends.lwjgl3.audio.OpenALLwjgl3Audio;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Clipboard;
 import io.github.ultreon.gdxminecraft.GdxMinecraft;
 import io.github.ultreon.gdxminecraft.api.ModLoader;
 import io.github.ultreon.gdxminecraft.mixin.Lwjgl3WindowAccessor;
+import io.github.ultreon.gdxminecraft.mixin.Lwjgl3WindowMixin;
 import net.minecraft.client.Minecraft;
-import org.apache.commons.lang3.ArrayUtils;
+import org.jetbrains.annotations.NotNull;
 
-public class MinecraftApplication implements Lwjgl3ApplicationBase {
+public class MinecraftApplication extends Lwjgl3Application {
     private final GdxMinecraft gdxMc;
-    private final Lwjgl3Input input;
-    private final Lwjgl3Window window;
-    private final Lwjgl3ApplicationConfiguration config;
     private ApplicationLogger applicationLogger;
     private final Minecraft minecraft;
-    private final Audio audio;
-    private final Files files;
-    private final Graphics graphics;
-    private final Net net;
-    private final Clipboard clipboard;
     private final Array<LifecycleListener> lifecycleListeners = new Array<>();
+    private Lwjgl3Window window;
 
     public MinecraftApplication(GdxMinecraft gdxMc, Minecraft minecraft) {
-        super();
+        super(gdxMc, createConfig(gdxMc, minecraft));
         this.gdxMc = gdxMc;
         this.applicationLogger = gdxMc.getApplicationLogger();
         this.minecraft = minecraft;
-
-        this.config = new Lwjgl3ApplicationConfiguration();
-        this.window = Lwjgl3WindowAccessor.invokeInit(gdxMc, config, this);
-
-        Gdx.input = input = this.createInput(window);
-        Gdx.audio = audio = this.createAudio(null);
-        Gdx.files = files = this.createFiles();
-        Gdx.graphics = graphics = this.createGraphics();
-        Gdx.net = net = this.createNet();
-        clipboard = this.createClipboard();
+        this.window = newWindow(gdxMc, createConfig(gdxMc, minecraft));
     }
 
-    private Clipboard createClipboard() {
-        return new Lwjgl3Clipboard();
-    }
-
-    private Net createNet() {
-        return new Lwjgl3Net(this.config);
-    }
-
-    private Graphics createGraphics() {
-        return new Lwjgl3Graphics(this.window);
-    }
-
-    private Files createFiles() {
-        return new Lwjgl3Files();
+    @NotNull
+    private static Lwjgl3ApplicationConfiguration createConfig(GdxMinecraft gdxMc, Minecraft minecraft) {
+        Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
+        config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.GL32, 3, 2);
+        config.setWindowListener(gdxMc.getWindowListener());
+        return config;
     }
 
     @Override
-    public ApplicationListener getApplicationListener() {
-        return gdxMc;
+    protected void cleanup() {
+        if (Minecraft.getInstance().isRunning()) {
+            return;
+        }
+        super.cleanup();
     }
 
     @Override
-    public Graphics getGraphics() {
-        return graphics;
+    protected void loop() {
+
     }
 
     @Override
-    public Audio getAudio() {
-        return audio;
-    }
+    public Lwjgl3Window newWindow(ApplicationListener listener, Lwjgl3WindowConfiguration config) {
+        if (this.window != null) throw new UnsupportedOperationException("Window already created!");
 
-    @Override
-    public Input getInput() {
-        return input;
-    }
-
-    @Override
-    public Files getFiles() {
-        return files;
-    }
-
-    @Override
-    public Net getNet() {
-        return net;
+        Lwjgl3Window lwjgl3Window = super.newWindow(listener, config);
+        this.window = lwjgl3Window;
+        GdxMinecraft.LOGGER.info("Created new window: " + lwjgl3Window);
+        return lwjgl3Window;
     }
 
     @Override
@@ -131,26 +98,6 @@ public class MinecraftApplication implements Lwjgl3ApplicationBase {
     }
 
     @Override
-    public ApplicationType getType() {
-        return ApplicationType.Desktop;
-    }
-
-    @Override
-    public int getVersion() {
-        return 0;
-    }
-
-    @Override
-    public long getJavaHeap() {
-        return Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-    }
-
-    @Override
-    public long getNativeHeap() {
-        return getJavaHeap();
-    }
-
-    @Override
     public Preferences getPreferences(String name) {
         ModLoader loader = GdxMinecraft.loader;
         FileHandle libgdx = loader.getConfigDir().child("libgdx");
@@ -158,11 +105,6 @@ public class MinecraftApplication implements Lwjgl3ApplicationBase {
             libgdx.mkdirs();
         }
         return new Lwjgl3Preferences(Gdx.files.local("libgdx_" + name + ".txt"));
-    }
-
-    @Override
-    public Clipboard getClipboard() {
-        return clipboard;
     }
 
     @Override
@@ -195,21 +137,15 @@ public class MinecraftApplication implements Lwjgl3ApplicationBase {
         this.applicationLogger = applicationLogger;
     }
 
-    @Override
-    public Lwjgl3Audio createAudio(Lwjgl3ApplicationConfiguration config) {
-        return new OpenALLwjgl3Audio();
-    }
-
-    @Override
-    public Lwjgl3Input createInput(Lwjgl3Window window) {
-        return new DefaultLwjgl3Input(window);
-    }
-
-    public Lwjgl3Window getWindow() {
-        return window;
-    }
-
     public Minecraft getMinecraft() {
         return minecraft;
+    }
+
+    public GdxMinecraft getGdxMc() {
+        return gdxMc;
+    }
+
+    public void update() {
+        ((Lwjgl3WindowAccessor)this.window).invokeUpdate();
     }
 }
