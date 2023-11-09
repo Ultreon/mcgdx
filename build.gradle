@@ -49,3 +49,24 @@ allprojects {
         withSourcesJar()
     }
 }
+
+afterEvaluate {
+    javadoc {
+        source(subprojects.collect { subproject ->
+            subproject.sourceSets.main.allJava.sourceDirectories
+        })
+        title = "GDX Minecraft"
+        description = "A projecct aiming to have LibGDX support for Minecraft"
+        setDestinationDir(file("$rootProject.projectDir/build/docs/javadoc"))
+        // Configure the classpath
+        classpath = files(subprojects.collect { subproject ->
+            subproject.sourceSets.main.compileClasspath
+        })
+        (options as StandardJavadocDocletOptions).links(
+                "https://javadoc.io/doc/com.badlogicgames.gdx/gdx/${gdx_version}",
+                "https://javadoc.io/doc/com.badlogicgames.gdx/gdx-backend-lwjgl3/${gdx_version}",
+                "https://maven.fabricmc.net/docs/fabric-loader-${fabric_loader_version}",
+                "https://maven.fabricmc.net/docs/fabric-api-${fabric_api_version}",
+        )
+    }
+}
