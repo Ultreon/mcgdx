@@ -12,11 +12,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Lwjgl3Window.class)
 public abstract class Lwjgl3WindowMixin implements Disposable {
-    @Inject(method = "<init>", at = @At("RETURN"))
+    @Inject(method = "<init>", at = @At("RETURN"), remap = false)
     private void gdx_minecraft$injectInit(ApplicationListener listener, Lwjgl3ApplicationConfiguration config, Lwjgl3ApplicationBase application, CallbackInfo ci) {
         ((Lwjgl3WindowAccessor) this).setConfig(null); // Gdx should not know the application configuration, as it's fully managed by Minecraft.
     }
-    @Inject(method = "create", at = @At("HEAD"))
+    @Inject(method = "create", at = @At("HEAD"), remap = false)
     private void gdx_minecraft$injectCreate(long windowHandle, CallbackInfo ci) {
         throw new UnsupportedOperationException("Minecraft does not support creating a window.");
     }

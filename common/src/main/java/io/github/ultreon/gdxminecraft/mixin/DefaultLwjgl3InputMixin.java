@@ -21,7 +21,7 @@ public abstract class DefaultLwjgl3InputMixin implements Disposable {
     @Shadow private GLFWMouseButtonCallback mouseButtonCallback;
     @Shadow private GLFWScrollCallback scrollCallback;
 
-    @Inject(method = "windowHandleChanged", at = @At("RETURN"))
+    @Inject(method = "windowHandleChanged", at = @At("RETURN"), remap = false)
     private void gdx_minecraft$injectInit(long windowHandle, CallbackInfo ci) {
 
     }
