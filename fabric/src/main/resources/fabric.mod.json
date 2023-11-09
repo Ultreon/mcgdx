@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "gdx_minecraft",
+  "version": "${version}",
+  "name": "LibGDX for Minecraft",
+  "description": "Adds LibGDX support for Minecraft",
+  "authors": [
+    "Ultreon Team"
+  ],
+  "contributors": [
+    "XyperCode"
+  ],
+  "contact": {
+    "sources": "https://github.com/Ultreon/gdx-minecraft",
+    "issues": "https://github.com/Ultreon/gdx-minecraft/issues",
+    "homepage": "https://github.com/Ultreon/gdx-minecraft"
+  },
+  "license": "Apache 2.0",
+  "icon": "assets/gdx_minecraft/icon.png",
+  "environment": "client",
+  "entrypoints": {},
+  "mixins": [
+    "gdx_minecraft.mixins.json",
+    "gdx_minecraft-common.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.23",
+    "minecraft": ">=1.20.2"
+  },
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.discord": "https://discord.gg/WePT9v2CmQ"
+      },
+      "badges": [ "library" ],
+      "update_checker": true
+    }
+  }
+}
