@@ -30,6 +30,7 @@ dependencies {
 
     modImplementation("com.terraformersmc:modmenu:8.0.0")
 
+    include implementation(api("space.earlygrey:shapedrawer:$shapedrawer_version"))
     include implementation(api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdx_version"))
     include implementation(api("com.badlogicgames.gdx:gdx:$gdx_version"))
     include implementation(api("com.badlogicgames.gdx:gdx-platform:$gdx_version:natives-desktop"))

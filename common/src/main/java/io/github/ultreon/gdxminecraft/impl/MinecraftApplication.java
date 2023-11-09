@@ -6,6 +6,8 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
 import io.github.ultreon.gdxminecraft.GdxMinecraft;
 import io.github.ultreon.gdxminecraft.api.ModLoader;
+import io.github.ultreon.gdxminecraft.mixin.Lwjgl3ApplicationAccessor;
+import io.github.ultreon.gdxminecraft.mixin.Lwjgl3GraphicsAccessor;
 import io.github.ultreon.gdxminecraft.mixin.Lwjgl3WindowAccessor;
 import io.github.ultreon.gdxminecraft.mixin.Lwjgl3WindowMixin;
 import net.minecraft.client.Minecraft;
@@ -16,18 +18,16 @@ public class MinecraftApplication extends Lwjgl3Application {
     private ApplicationLogger applicationLogger;
     private final Minecraft minecraft;
     private final Array<LifecycleListener> lifecycleListeners = new Array<>();
-    private Lwjgl3Window window;
 
     public MinecraftApplication(GdxMinecraft gdxMc, Minecraft minecraft) {
         super(gdxMc, createConfig(gdxMc, minecraft));
         this.gdxMc = gdxMc;
         this.applicationLogger = gdxMc.getApplicationLogger();
         this.minecraft = minecraft;
-        this.window = newWindow(gdxMc, createConfig(gdxMc, minecraft));
     }
 
     @NotNull
-    private static Lwjgl3ApplicationConfiguration createConfig(GdxMinecraft gdxMc, Minecraft minecraft) {
+    public static Lwjgl3ApplicationConfiguration createConfig(GdxMinecraft gdxMc, Minecraft minecraft) {
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
         config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.GL32, 3, 2);
         config.setWindowListener(gdxMc.getWindowListener());
@@ -45,16 +45,6 @@ public class MinecraftApplication extends Lwjgl3Application {
     @Override
     protected void loop() {
 
-    }
-
-    @Override
-    public Lwjgl3Window newWindow(ApplicationListener listener, Lwjgl3WindowConfiguration config) {
-        if (this.window != null) throw new UnsupportedOperationException("Window already created!");
-
-        Lwjgl3Window lwjgl3Window = super.newWindow(listener, config);
-        this.window = lwjgl3Window;
-        GdxMinecraft.LOGGER.info("Created new window: " + lwjgl3Window);
-        return lwjgl3Window;
     }
 
     @Override
@@ -146,6 +136,8 @@ public class MinecraftApplication extends Lwjgl3Application {
     }
 
     public void update() {
-        ((Lwjgl3WindowAccessor)this.window).invokeUpdate();
+        Lwjgl3Window gdxWindow = GdxMinecraft.window.getGdxWindow();
+        ((Lwjgl3ApplicationAccessor)this).setCurrentWindow(gdxWindow);
+        ((Lwjgl3WindowAccessor) gdxWindow).invokeUpdate();
     }
 }

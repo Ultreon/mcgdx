@@ -22,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import java.nio.IntBuffer;
 
 @Mixin(Lwjgl3Graphics.class)
-public abstract class Lwjgl3GraphicsMixin implements Disposable {
+public abstract class Lwjgl3GraphicsMixin implements Disposable, Graphics {
     @Shadow @Final
     Lwjgl3Window window;
     @Shadow
@@ -69,59 +69,5 @@ public abstract class Lwjgl3GraphicsMixin implements Disposable {
     @Overwrite(remap = false)
     public int getFramesPerSecond() {
         return Minecraft.getInstance().getFps();
-    }
-
-    /**
-     * @author XyperCode
-     * @reason Minecraft manages the application, so we just get the width from Minecraft.
-     */
-    @Overwrite(remap = false)
-    public int getWidth() {
-        return Minecraft.getInstance().getWindow().getWidth();
-    }
-
-    /**
-     * @author XyperCode
-     * @reason Minecraft manages the application, so we just get the height from Minecraft.
-     */
-    @Overwrite(remap = false)
-    public int getHeight() {
-        return Minecraft.getInstance().getWindow().getHeight();
-    }
-
-    /**
-     * @author XyperCode
-     * @reason Minecraft manages the application, so we just get the width from Minecraft.
-     */
-    @Overwrite(remap = false)
-    public int getBackBufferWidth() {
-        return Minecraft.getInstance().getWindow().getWidth();
-    }
-
-    /**
-     * @author XyperCode
-     * @reason Minecraft manages the application, so we just get the height from Minecraft.
-     */
-    @Overwrite(remap = false)
-    public int getBackBufferHeight() {
-        return Minecraft.getInstance().getWindow().getHeight();
-    }
-
-    /**
-     * @author XyperCode
-     * @reason Minecraft manages the application, so we just get the scaled width from Minecraft.
-     */
-    @Overwrite(remap = false)
-    public int getLogicalWidth() {
-        return Minecraft.getInstance().getWindow().getWidth();
-    }
-
-    /**
-     * @author XyperCode
-     * @reason Minecraft manages the application, so we just get the scaled height from Minecraft.
-     */
-    @Overwrite(remap = false)
-    public int getLogicalHeight() {
-        return Minecraft.getInstance().getWindow().getHeight();
     }
 }

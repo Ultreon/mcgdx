@@ -20,6 +20,7 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
+    include forgeRuntimeLibrary(api("space.earlygrey:shapedrawer:$shapedrawer_version"))
     include forgeRuntimeLibrary(api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdx_version"))
     include forgeRuntimeLibrary(api("com.badlogicgames.gdx:gdx:$gdx_version"))
     include forgeRuntimeLibrary(api("com.badlogicgames.gdx:gdx-platform:$gdx_version:natives-desktop"))

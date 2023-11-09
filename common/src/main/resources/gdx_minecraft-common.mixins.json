@@ -6,13 +6,17 @@
   "mixins": [
     "DefaultLwjgl3InputAccessor",
     "DefaultLwjgl3InputMixin",
+    "Lwjgl3ApplicationAccessor",
     "Lwjgl3ApplicationMixin",
+    "Lwjgl3GraphicsAccessor",
     "Lwjgl3GraphicsMixin",
     "Lwjgl3WindowAccessor",
     "Lwjgl3WindowMixin"
   ],
   "client": [
+    "MainMixin",
     "McWindowMixin",
+    "MinecraftAccessor",
     "MinecraftMixin"
   ],
   "injectors": {
