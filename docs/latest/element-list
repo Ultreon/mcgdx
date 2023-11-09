@@ -1,0 +1,8 @@
+io.github.ultreon.gdxminecraft
+io.github.ultreon.gdxminecraft.api
+io.github.ultreon.gdxminecraft.fabric
+io.github.ultreon.gdxminecraft.forge
+io.github.ultreon.gdxminecraft.impl
+io.github.ultreon.gdxminecraft.impl.fabric
+io.github.ultreon.gdxminecraft.impl.forge
+io.github.ultreon.gdxminecraft.mixin
