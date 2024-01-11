@@ -27,7 +27,7 @@ public class McWindowMixin {
         return capabilities;
     }
 
-    @Inject(method = "setIcon", at = @At("HEAD"), remap = false, cancellable = true)
+    @Inject(method = "setIcon", at = @At("HEAD"), cancellable = true)
     private void gdx_minecraft$injectSetIcon(PackResources packResources, IconSet iconSet, CallbackInfo ci) {
         ci.cancel();
     }

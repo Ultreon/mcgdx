@@ -34,6 +34,8 @@ dependencies {
     include implementation(api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdx_version"))
     include implementation(api("com.badlogicgames.gdx:gdx:$gdx_version"))
     include implementation(api("com.badlogicgames.gdx:gdx-platform:$gdx_version:natives-desktop"))
+    include implementation(api("com.badlogicgames.gdx:gdx-jnigen-loader:2.3.1"))
+    include implementation(api("com.badlogicgames.jlayer:jlayer:1.0.1-gdx"))
 
 }
 
