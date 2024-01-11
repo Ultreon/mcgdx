@@ -31,23 +31,18 @@ public class GdxTestScreen extends GdxScreen {
     public void render(ShapeDrawer shapeDrawer, Batch batch, int i, int j, float f) {
         super.render(shapeDrawer, batch, i, j, f);
 
-//        Gdx.gl.glFlush();
-//        batch.begin();
-
-//        Gdx.gl20.glActiveTexture(GL20.GL_TEXTURE0);
-//        shapeDrawer.setColor(1, 0, 0, 1);
-//        shapeDrawer.filledRectangle(-50, -50, width + 100, height + 100);
-//        Gdx.gl20.glActiveTexture(GL20.GL_TEXTURE0);
-//        batch.end();
+        // Always call begin() at the beginning of a batch.
         batch.begin();
+
+        // Draw a rectangle using the shape drawer.
+        shapeDrawer.setColor(1, 1, 3, 8);
+        shapeDrawer.filledCircle(0, 0, 250, Color.SCARLET);
+
+        // Draw hello world text using font.
         this.font.draw(batch, "Hello World!", 10, 10);
-//        batch.draw(texture, 0, 0, width, height, 0, 0, 1, 1);
+
+        // Always call end() at the end of a batch.
         batch.end();
-
-
-//        texture.bind(0);
-//        MESH.render(SHADER, GL20.GL_TRIANGLES);
-//        Gdx.gl.glFlush();
     }
     public static Mesh createFullScreenQuad() {
         MeshBuilder builder = new MeshBuilder();

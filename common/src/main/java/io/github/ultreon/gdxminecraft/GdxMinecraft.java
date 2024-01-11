@@ -14,6 +14,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.utils.GdxNativesLoader;
 import com.mojang.blaze3d.platform.Window;
 import io.github.ultreon.gdxminecraft.api.ModLoader;
 import io.github.ultreon.gdxminecraft.impl.MinecraftApplication;
@@ -51,7 +52,7 @@ public class GdxMinecraft implements ApplicationListener {
     public GdxMinecraft() {
         instance = this;
         try {
-            Lwjgl3NativesLoader.load();
+            GdxNativesLoader.load();
             GdxMinecraft.app = new MinecraftApplication(this, Minecraft.getInstance());
         } catch (Throwable e) {
             CrashReport libGDXCrash = new CrashReport("LibGDX failed to initialize", e);
@@ -72,7 +73,7 @@ public class GdxMinecraft implements ApplicationListener {
 
     public static void initialize() {
         batch = new SpriteBatch();
-        Pixmap whitePix = new Pixmap(1, 1, Pixmap.Format.RGB888);
+        Pixmap whitePix = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         whitePix.drawPixel(0, 0, 0xffffffff);
         Texture white = new Texture(whitePix, true);
         shapeRenderer = new ShapeDrawer(batch, new TextureRegion(white));
@@ -88,7 +89,7 @@ public class GdxMinecraft implements ApplicationListener {
     }
 
     public void resize0(int width, int height) {
-        LOGGER.info("Resizing to " + width + "x" + height);
+        Gdx.app.log("GDX-Minecraft", "Resizing to " + width + "x" + height);
 
         batch.setProjectionMatrix(batch.getProjectionMatrix().setToOrtho(0, width, height, 0, -1000000, 1000000));
 
@@ -96,7 +97,7 @@ public class GdxMinecraft implements ApplicationListener {
         this.height = height;
 
         long windowHandle = window.getHandle();
-        if (Configuration.GLFW_CHECK_THREAD0.get(true)) {
+        if (Boolean.TRUE.equals(Configuration.GLFW_CHECK_THREAD0.get(true))) {
             this.renderWindow(windowHandle, width, height);
         } else {
             if (posted) return;
@@ -130,17 +131,17 @@ public class GdxMinecraft implements ApplicationListener {
 
     @Override
     public void pause() {
-
+        // Nothing
     }
 
     @Override
     public void resume() {
-
+        // Nothing
     }
 
     @Override
     public void dispose() {
-
+        batch.dispose();
     }
 
     public ApplicationLogger getApplicationLogger() {
