@@ -1,23 +1,22 @@
 {
   "required": true,
-  "refmap": "gdx-minecraft-common-refmap.json",
   "minVersion": "0.8",
   "package": "io.github.ultreon.gdxminecraft.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "DefaultLwjgl3InputAccessor",
+    "accessors.DefaultLwjgl3InputAccessor",
     "DefaultLwjgl3InputMixin",
-    "Lwjgl3ApplicationAccessor",
+    "accessors.Lwjgl3ApplicationAccessor",
     "Lwjgl3ApplicationMixin",
-    "Lwjgl3GraphicsAccessor",
+    "accessors.Lwjgl3GraphicsAccessor",
     "Lwjgl3GraphicsMixin",
-    "Lwjgl3WindowAccessor",
+    "accessors.Lwjgl3WindowAccessor",
     "Lwjgl3WindowMixin"
   ],
   "client": [
     "MainMixin",
     "McWindowMixin",
-    "MinecraftAccessor",
+    "accessors.MinecraftAccessor",
     "MinecraftMixin"
   ],
   "injectors": {

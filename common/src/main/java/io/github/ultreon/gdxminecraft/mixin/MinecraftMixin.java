@@ -2,7 +2,7 @@ package io.github.ultreon.gdxminecraft.mixin;
 
 import com.mojang.blaze3d.platform.Window;
 import io.github.ultreon.gdxminecraft.GdxMinecraft;
-import io.github.ultreon.gdxminecraft.impl.MinecraftApplication;
+import io.github.ultreon.gdxminecraft.mixin.accessors.MinecraftAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Overlay;
 import net.minecraft.client.gui.screens.Screen;
@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Minecraft.class)
-public class MinecraftMixin {
+public abstract class MinecraftMixin {
     @Shadow @Nullable
     public ClientLevel level;
     @Shadow @Nullable

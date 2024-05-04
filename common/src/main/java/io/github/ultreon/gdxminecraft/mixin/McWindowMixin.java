@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @SuppressWarnings("DataFlowIssue")
 @Mixin(Window.class)
-public class McWindowMixin {
+public abstract class McWindowMixin {
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL;createCapabilities()Lorg/lwjgl/opengl/GLCapabilities;"), remap = false)
     private GLCapabilities gdx_minecraft$injectInit() {

@@ -1,4 +1,4 @@
-package io.github.ultreon.gdxminecraft.mixin;
+package io.github.ultreon.gdxminecraft.mixin.accessors;
 
 import net.minecraft.client.Minecraft;
 import org.spongepowered.asm.mixin.Mixin;

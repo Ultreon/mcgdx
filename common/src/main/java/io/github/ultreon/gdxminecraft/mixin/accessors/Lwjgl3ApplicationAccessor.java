@@ -1,7 +1,6 @@
-package io.github.ultreon.gdxminecraft.mixin;
+package io.github.ultreon.gdxminecraft.mixin.accessors;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;

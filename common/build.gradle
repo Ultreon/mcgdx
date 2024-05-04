@@ -4,7 +4,10 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
 
     implementation api("space.earlygrey:shapedrawer:$shapedrawer_version")
-    implementation api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdx_version")
+    implementation api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdx_version", {
+        exclude group: "org.lwjgl.lwjgl"
+        exclude group: "org.lwjgl"
+    })
     implementation api("com.badlogicgames.gdx:gdx:$gdx_version")
     implementation api("com.badlogicgames.gdx:gdx-platform:$gdx_version:natives-desktop")
 }

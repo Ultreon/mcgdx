@@ -1,4 +1,4 @@
-package io.github.ultreon.gdxminecraft.mixin;
+package io.github.ultreon.gdxminecraft.mixin.accessors;
 
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationBase;

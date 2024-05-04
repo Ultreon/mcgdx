@@ -8,6 +8,7 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
 import com.badlogic.gdx.utils.Disposable;
 import io.github.ultreon.gdxminecraft.GdxMinecraft;
 import io.github.ultreon.gdxminecraft.impl.MinecraftGdxLogger;
+import io.github.ultreon.gdxminecraft.mixin.accessors.Lwjgl3WindowAccessor;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Mixin;

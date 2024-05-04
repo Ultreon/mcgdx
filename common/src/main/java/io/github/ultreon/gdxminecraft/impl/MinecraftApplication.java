@@ -6,10 +6,8 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
 import io.github.ultreon.gdxminecraft.GdxMinecraft;
 import io.github.ultreon.gdxminecraft.api.ModLoader;
-import io.github.ultreon.gdxminecraft.mixin.Lwjgl3ApplicationAccessor;
-import io.github.ultreon.gdxminecraft.mixin.Lwjgl3GraphicsAccessor;
-import io.github.ultreon.gdxminecraft.mixin.Lwjgl3WindowAccessor;
-import io.github.ultreon.gdxminecraft.mixin.Lwjgl3WindowMixin;
+import io.github.ultreon.gdxminecraft.mixin.accessors.Lwjgl3ApplicationAccessor;
+import io.github.ultreon.gdxminecraft.mixin.accessors.Lwjgl3WindowAccessor;
 import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.NotNull;
 
