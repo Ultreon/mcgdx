@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "gdx_minecraft",
+  "id": "mcgdx",
   "version": "${version}",
   "name": "LibGDX for Minecraft",
   "description": "Adds LibGDX support for Minecraft",
@@ -20,10 +20,10 @@
   "environment": "client",
   "entrypoints": {
     "client": [
-      "io.github.ultreon.gdxminecraft.fabric.FabricGdxLauncher"
+      "dev.ultreon.mcgdx.fabric.FabricGdxLauncher"
     ],
     "modmenu": [
-      "io.github.ultreon.gdxminecraft.fabric.ModMenuHandler"
+      "dev.ultreon.mcgdx.fabric.ModMenuHandler"
     ]
   },
   "mixins": [

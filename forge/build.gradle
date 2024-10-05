@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2024.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 plugins {
     id "com.github.johnrengelman.shadow" version "7.1.2"
 }
@@ -20,13 +36,34 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
-    include forgeRuntimeLibrary(api("space.earlygrey:shapedrawer:$shapedrawer_version"))
-    include forgeRuntimeLibrary(api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdx_version", {
+    modApi "dev.architectury:architectury-forge:${rootProject.architectury_version}"
+
+    implementation("space.earlygrey:shapedrawer:$shapedrawer_version")
+    implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdx_version", {
         exclude group: "org.lwjgl.lwjgl"
         exclude group: "org.lwjgl"
-    }))
-    include forgeRuntimeLibrary(api("com.badlogicgames.gdx:gdx:$gdx_version"))
-    include forgeRuntimeLibrary(api("com.badlogicgames.gdx:gdx-platform:$gdx_version:natives-desktop"))
+    })
+    implementation("com.badlogicgames.gdx:gdx:$gdx_version")
+    implementation("com.badlogicgames.gdx:gdx-jnigen-loader:2.3.1")
+    implementation("com.badlogicgames.gdx:gdx-platform:$gdx_version:natives-desktop")
+
+    forgeRuntimeLibrary("space.earlygrey:shapedrawer:$shapedrawer_version")
+    forgeRuntimeLibrary("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdx_version", {
+        exclude group: "org.lwjgl.lwjgl"
+        exclude group: "org.lwjgl"
+    })
+    forgeRuntimeLibrary("com.badlogicgames.gdx:gdx:$gdx_version")
+    forgeRuntimeLibrary("com.badlogicgames.gdx:gdx-jnigen-loader:2.3.1")
+    forgeRuntimeLibrary("com.badlogicgames.gdx:gdx-platform:$gdx_version:natives-desktop")
+
+    include("space.earlygrey:shapedrawer:$shapedrawer_version")
+    include("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdx_version", {
+        exclude group: "org.lwjgl.lwjgl"
+        exclude group: "org.lwjgl"
+    })
+    include("com.badlogicgames.gdx:gdx:$gdx_version")
+    include("com.badlogicgames.gdx:gdx-jnigen-loader:2.3.1")
+    include("com.badlogicgames.gdx:gdx-platform:$gdx_version:natives-desktop")
 }
 
 processResources {

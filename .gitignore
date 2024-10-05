@@ -1,10 +1,5 @@
 # User-specific stuff
-.idea/*.xml
-.idea/.name
-.idea/runConfigurations
-.idea/modules
-.idea/sonarlint
-!.idea/discord.xml
+.idea
 
 *.iml
 *.ipr
