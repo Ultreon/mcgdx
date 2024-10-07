@@ -24,25 +24,17 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultRenderableSorter;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
-import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ultreon.mcgdx.GdxMinecraft;
 import dev.ultreon.mcgdx.api.Gdx3DRenderSource;
-import dev.ultreon.mcgdx.mixin.accessors.GameRendererAccessor;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
-import org.joml.AxisAngle4f;
-import org.joml.Vector3f;
 
 public class GdxBlockEntityRenderer implements BlockEntityRenderer<GdxBlockEntity>, Gdx3DRenderSource<GdxBlockEntity> {
     private final PerspectiveCamera camera = new PerspectiveCamera(70, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-    private final Vector3f pos = new Vector3f();
-    private final AxisAngle4f rotation = new AxisAngle4f();
 
     private final ModelBatch batch = new ModelBatch(new DefaultShaderProvider("""
             #if defined(diffuseTextureFlag) || defined(specularTextureFlag) || defined(emissiveTextureFlag)
@@ -265,10 +257,10 @@ public class GdxBlockEntityRenderer implements BlockEntityRenderer<GdxBlockEntit
             		#ifdef boneWeight0Flag
             			skinning += (a_boneWeight0.y) * u_bones[int(a_boneWeight0.x)];
             		#endif //boneWeight0Flag
-            		#ifdef boneWeight1Flag				
+            		#ifdef boneWeight1Flag
             			skinning += (a_boneWeight1.y) * u_bones[int(a_boneWeight1.x)];
             		#endif //boneWeight1Flag
-            		#ifdef boneWeight2Flag		
+            		#ifdef boneWeight2Flag
             			skinning += (a_boneWeight2.y) * u_bones[int(a_boneWeight2.x)];
             		#endif //boneWeight2Flag
             		#ifdef boneWeight3Flag
@@ -324,7 +316,7 @@ public class GdxBlockEntityRenderer implements BlockEntityRenderer<GdxBlockEntit
                     	vec3 ambientLight = vec3(0.0);
             		#endif
             
-            		#ifdef ambientCubemapFlag 		
+            		#ifdef ambientCubemapFlag
             			vec3 squaredNormal = normal * normal;
             			vec3 isPositive  = step(0.0, normal);
             			ambientLight += squaredNormal.x * mix(u_ambientCubemap[0], u_ambientCubemap[1], isPositive.x) +
@@ -341,7 +333,7 @@ public class GdxBlockEntityRenderer implements BlockEntityRenderer<GdxBlockEntit
             			ambientLight += u_sphericalHarmonics[5] * (normal.z * normal.y);
             			ambientLight += u_sphericalHarmonics[6] * (normal.y * normal.x);
             			ambientLight += u_sphericalHarmonics[7] * (3.0 * normal.z * normal.z - 1.0);
-            			ambientLight += u_sphericalHarmonics[8] * (normal.x * normal.x - normal.y * normal.y);			
+            			ambientLight += u_sphericalHarmonics[8] * (normal.x * normal.x - normal.y * normal.y);
             		#endif // sphericalHarmonicsFlag
             
             		#ifdef ambientFlag
@@ -679,9 +671,7 @@ public class GdxBlockEntityRenderer implements BlockEntityRenderer<GdxBlockEntit
 
     });
     private final Gdx3DRenderable renderable;
-    private final Vector3 tmp = new Vector3();
-    private final Environment environment = new Environment();
-    private final ColorAttribute FOG = ColorAttribute.createFog(GdxMinecraft.fogColor);
+    public static final Environment environment = new Environment();
 
     public GdxBlockEntityRenderer(BlockEntityRendererProvider.Context context, Gdx3DRenderable renderable) {
         this.renderable = renderable;
@@ -690,39 +680,11 @@ public class GdxBlockEntityRenderer implements BlockEntityRenderer<GdxBlockEntit
 
     @Override
     public final void render(GdxBlockEntity blockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
-        PoseStack.Pose pose = poseStack.last();
-        pose.pose().getTranslation(pos);
-
-        camera.fieldOfView = (float) ((GameRendererAccessor) Minecraft.getInstance().gameRenderer).invokeGetFov(Minecraft.getInstance().gameRenderer.getMainCamera(), f, true);
-        camera.viewportWidth = Gdx.graphics.getWidth();
-        camera.viewportHeight = Gdx.graphics.getHeight();
-
-        FOG.color.set(GdxMinecraft.fogColor);
-
-        environment.set(FOG);
-
-        camera.near = 0.05f;
-        camera.far = Minecraft.getInstance().gameRenderer.getDepthFar();
-
-        camera.position.set(-pos.x, -pos.y, -pos.z);
-        camera.direction.set(0, 0, -1);
-        camera.up.set(0, 1, 0);
-
-        pose.pose().getRotation(rotation);
-        camera.rotateAround(Vector3.Zero, tmp.set(rotation.x, rotation.y, rotation.z), rotation.angle);
-
-        float aspect = (float) Gdx.graphics.getWidth() / Gdx.graphics.getHeight();
-        camera.projection.setToProjection(Math.abs(camera.near), Math.abs(camera.far), camera.fieldOfView, aspect);
-        camera.view.setToTranslation(pos.x, pos.y, pos.z).rotateRad(rotation.x, rotation.y, rotation.z, rotation.angle);
-        camera.combined.set(camera.projection);
-        Matrix4.mul(camera.combined.val, camera.view.val);
-
-        camera.invProjectionView.set(camera.combined);
-        Matrix4.inv(camera.invProjectionView.val);
-        camera.frustum.update(camera.invProjectionView);
+        GdxMinecraft.setupCamera(camera, f, poseStack);
 
         batch.begin(camera);
         Gdx.gl.glCullFace(GL20.GL_BACK);
+        RenderContext renderContext = batch.getRenderContext();
 
         render(blockEntity);
 

@@ -27,7 +27,7 @@ public class ForgeGdxLauncher {
     public ForgeGdxLauncher() {
         if (FMLEnvironment.dist != Dist.CLIENT) return;
 
-        GdxMinecraft.setup();
+//        GdxMinecraft.setup();
         GdxMinecraft.loader = new ForgeModLoader();
     }
 }

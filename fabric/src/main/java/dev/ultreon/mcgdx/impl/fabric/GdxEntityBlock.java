@@ -19,6 +19,7 @@ package dev.ultreon.mcgdx.impl.fabric;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -38,5 +39,9 @@ public class GdxEntityBlock extends Block implements EntityBlock {
     @Override
     public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
         return typeSupplier.get().create(blockPos, blockState);
+    }
+
+    public RenderShape getRenderShape(BlockState arg) {
+        return RenderShape.ENTITYBLOCK_ANIMATED;
     }
 }

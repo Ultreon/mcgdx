@@ -33,17 +33,21 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import com.badlogic.gdx.graphics.glutils.FrameBufferCubemap;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.GdxNativesLoader;
 import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ultreon.mcgdx.api.McGdx;
 import dev.ultreon.mcgdx.api.ModLoader;
 import dev.ultreon.mcgdx.api.NamespaceID;
 import dev.ultreon.mcgdx.impl.*;
+import dev.ultreon.mcgdx.mixin.accessors.GameRendererAccessor;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.client.Minecraft;
+import org.joml.AxisAngle4f;
+import org.joml.Vector3f;
 import org.lwjgl.system.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,14 +56,15 @@ import space.earlygrey.shapedrawer.ShapeDrawer;
 public class GdxMinecraft implements ApplicationListener {
     public static final String MOD_ID = "mcgdx";
     public static final Logger LOGGER = LoggerFactory.getLogger("GDX-Minecraft");
+    private static final Vector3f pos = new Vector3f();
+    private static final AxisAngle4f rotation = new AxisAngle4f();
+    private static final Vector3 tmp = new Vector3();
     public static Color fogColor = new Color();
-//    public static Cubemap cubeMap;
-//
-//    public static FrameBufferCubemap cubemapFBO;
+    private static final ColorAttribute FOG = ColorAttribute.createFog(fogColor);
+
     public static boolean disableCubemapUsage = false;
 
     private static GdxMinecraft instance;
-    private static Material material;
     private static Model cube;
     private static ModelInstance cubeInstance;
     private final Lwjgl3WindowListener windowListener = new UselessWindowListener();
@@ -117,7 +122,7 @@ public class GdxMinecraft implements ApplicationListener {
         gdxThread = Thread.currentThread();
         bitmapFont = new BitmapFont(true);
 
-        material = new Material("box_id");
+        Material material = new Material("box_id");
         material.set(ColorAttribute.createDiffuse(new Color(1, 1, 1, 1)));
         ModelBuilder modelBuilder = new ModelBuilder();
         cube = modelBuilder.createSphere(1, 1, 1, 50, 50, GL20.GL_TRIANGLES, material, VertexAttributes.Usage.Normal | VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked);
@@ -128,6 +133,69 @@ public class GdxMinecraft implements ApplicationListener {
     public static void init() {
         if (instance == null) {
             instance = new GdxMinecraft();
+        }
+    }
+
+    public static void setupCamera(Camera camera, float f, PoseStack poseStack) {
+        PoseStack.Pose pose = poseStack.last();
+        pose.pose().getTranslation(pos);
+
+        if (camera instanceof PerspectiveCamera perspectiveCamera) {
+            perspectiveCamera.fieldOfView = (float) ((GameRendererAccessor) Minecraft.getInstance().gameRenderer).invokeGetFov(Minecraft.getInstance().gameRenderer.getMainCamera(), f, true);
+            camera.viewportWidth = Gdx.graphics.getWidth();
+            camera.viewportHeight = Gdx.graphics.getHeight();
+
+            FOG.color.set(fogColor);
+
+            GdxBlockEntityRenderer.environment.set(FOG);
+
+            camera.near = 0.05f;
+            camera.far = Minecraft.getInstance().gameRenderer.getDepthFar();
+
+            camera.position.set(-pos.x, -pos.y, -pos.z);
+            camera.direction.set(0, 0, -1);
+            camera.up.set(0, 1, 0);
+
+            pose.pose().getRotation(rotation);
+            camera.rotateAround(Vector3.Zero, tmp.set(rotation.x, rotation.y, rotation.z), rotation.angle);
+
+            float aspect = (float) Gdx.graphics.getWidth() / Gdx.graphics.getHeight();
+            camera.projection.setToProjection(Math.abs(camera.near), Math.abs(camera.far), perspectiveCamera.fieldOfView, aspect);
+            camera.view.setToTranslation(pos.x, pos.y, pos.z).rotateRad(rotation.x, rotation.y, rotation.z, rotation.angle);
+            camera.combined.set(camera.projection);
+            Matrix4.mul(camera.combined.val, camera.view.val);
+
+            camera.invProjectionView.set(camera.combined);
+            Matrix4.inv(camera.invProjectionView.val);
+            camera.frustum.update(camera.invProjectionView);
+        }
+        if (camera instanceof OrthographicCamera orthographicCamera) {
+            camera.viewportWidth = Gdx.graphics.getWidth();
+            camera.viewportHeight = Gdx.graphics.getHeight();
+
+            FOG.color.set(fogColor);
+
+            GdxBlockEntityRenderer.environment.set(FOG);
+
+            camera.near = 0f;
+            camera.far = 15000;
+
+            camera.position.set(-pos.x, -pos.y, -pos.z);
+            camera.direction.set(0, 0, -1);
+            camera.up.set(0, 1, 0);
+
+            pose.pose().getRotation(rotation);
+            camera.rotateAround(Vector3.Zero, tmp.set(rotation.x, rotation.y, rotation.z), rotation.angle);
+
+            float aspect = (float) Gdx.graphics.getWidth() / Gdx.graphics.getHeight();
+            camera.projection.setToOrtho(0, Gdx.graphics.getWidth(), 0, Gdx.graphics.getHeight(), Math.abs(camera.near), Math.abs(camera.far));
+            camera.view.setToTranslation(pos.x, pos.y, pos.z).rotateRad(rotation.x, rotation.y, rotation.z, rotation.angle);
+            camera.combined.set(camera.projection);
+            Matrix4.mul(camera.combined.val, camera.view.val);
+
+            camera.invProjectionView.set(camera.combined);
+            Matrix4.inv(camera.invProjectionView.val);
+            camera.frustum.update(camera.invProjectionView);
         }
     }
 
@@ -202,6 +270,7 @@ public class GdxMinecraft implements ApplicationListener {
     @Override
     public void dispose() {
         batch.dispose();
+        cube.dispose();
     }
 
     public ApplicationLogger getApplicationLogger() {
