@@ -33,19 +33,20 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.GdxNativesLoader;
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.vertex.PoseStack;
+import dev.ultreon.mcgdx.api.Gdx3DRenderSource;
 import dev.ultreon.mcgdx.api.McGdx;
 import dev.ultreon.mcgdx.api.ModLoader;
 import dev.ultreon.mcgdx.api.NamespaceID;
 import dev.ultreon.mcgdx.impl.*;
-import dev.ultreon.mcgdx.mixin.accessors.GameRendererAccessor;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.client.Minecraft;
+import org.jetbrains.annotations.ApiStatus;
 import org.joml.AxisAngle4f;
 import org.joml.Vector3f;
 import org.lwjgl.system.Configuration;
@@ -53,14 +54,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
+@ApiStatus.Internal
+@SuppressWarnings("GDXJavaStaticResource")
 public class GdxMinecraft implements ApplicationListener {
     public static final String MOD_ID = "mcgdx";
     public static final Logger LOGGER = LoggerFactory.getLogger("GDX-Minecraft");
-    private static final Vector3f pos = new Vector3f();
-    private static final AxisAngle4f rotation = new AxisAngle4f();
-    private static final Vector3 tmp = new Vector3();
+
+    public static final Vector3f pos = new Vector3f();
+    public static final AxisAngle4f rotation = new AxisAngle4f();
+    public static final Vector3 tmp = new Vector3();
     public static Color fogColor = new Color();
-    private static final ColorAttribute FOG = ColorAttribute.createFog(fogColor);
+    public static final ColorAttribute FOG = ColorAttribute.createFog(fogColor);
 
     public static boolean disableCubemapUsage = false;
 
@@ -88,10 +92,7 @@ public class GdxMinecraft implements ApplicationListener {
             GdxMinecraft.app = new MinecraftApplication(this, new MinecraftApplicationConfiguration(), Minecraft.getInstance());
             McGdx.blockEntityManager = new MinecraftBlockEntityManager();
 
-            McGdx.blockEntityManager.register(new NamespaceID("mcgdx", "example"), source -> {
-                ModelBatch batch1 = source.getBatch();
-                batch1.render(cubeInstance);
-            });
+            McGdx.blockEntityManager.register(new NamespaceID("mcgdx", "example"), GdxMinecraft::renderExample);
         } catch (Throwable e) {
             CrashReport libGDXCrash = new CrashReport("LibGDX failed to initialize", e);
             CrashReportCategory libGDX = libGDXCrash.addCategory("LibGDX");
@@ -112,8 +113,67 @@ public class GdxMinecraft implements ApplicationListener {
         return instance;
     }
 
+    public static String toVert150(String vert120) {
+        vert120 = vert120.replace("\nattribute ", "\nin ");
+        vert120 = vert120.replace(" attribute ", " in ");
+
+        vert120 = vert120.replace("\nvarying ", "\nout ");
+        vert120 = vert120.replace(" varying ", " out ");
+
+        vert120 = vert120.replace("texture2D(", "texture(");
+
+        return vert120;
+    }
+
+    public static String toFrag150(String frag120) {
+        frag120 = frag120.replace("\nattribute ", "\nout ");
+        frag120 = frag120.replace(" attribute ", " out ");
+
+        frag120 = frag120.replace("\nvarying ", "\nin ");
+        frag120 = frag120.replace(" varying ", " in ");
+
+        if (frag120.contains("gl_FragColor")) {
+            frag120 = frag120.replace("void main()",
+                    "out vec4 fragColor; \nvoid main()");
+            frag120 = frag120.replace("gl_FragColor", "fragColor");
+        }
+
+        frag120 = frag120.replace("texture2D(", "texture(");
+        frag120 = frag120.replace("textureCube(", "texture(");
+
+        return frag120;
+    }
+
+    public static final String vertexShader = "attribute vec4 " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
+                          + "attribute vec4 " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
+                          + "attribute vec2 " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n" //
+                          + "uniform mat4 u_projTrans;\n" //
+                          + "varying vec4 v_color;\n" //
+                          + "varying vec2 v_texCoords;\n" //
+                          + "\n" //
+                          + "void main()\n" //
+                          + "{\n" //
+                          + "   v_color = " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
+                          + "   v_color.a = v_color.a * (255.0/254.0);\n" //
+                          + "   v_texCoords = " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n" //
+                          + "   gl_Position =  u_projTrans * " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
+                          + "}\n";
+    public static final String fragmentShader = "#ifdef GL_ES\n" //
+                            + "#define LOWP lowp\n" //
+                            + "precision mediump float;\n" //
+                            + "#else\n" //
+                            + "#define LOWP \n" //
+                            + "#endif\n" //
+                            + "varying LOWP vec4 v_color;\n" //
+                            + "varying vec2 v_texCoords;\n" //
+                            + "uniform sampler2D u_texture;\n" //
+                            + "void main()\n"//
+                            + "{\n" //
+                            + "  gl_FragColor = v_color * texture2D(u_texture, v_texCoords);\n" //
+                            + "}";
+
     public static void initialize() {
-        batch = new SpriteBatch();
+        batch = new SpriteBatch(1000, new ShaderProgram(toVert150(toVert150(vertexShader)), toFrag150(fragmentShader)));
         Pixmap whitePix = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         whitePix.drawPixel(0, 0, 0xffffffff);
         Texture white = new Texture(whitePix, true);
@@ -136,67 +196,9 @@ public class GdxMinecraft implements ApplicationListener {
         }
     }
 
-    public static void setupCamera(Camera camera, float f, PoseStack poseStack) {
-        PoseStack.Pose pose = poseStack.last();
-        pose.pose().getTranslation(pos);
-
-        if (camera instanceof PerspectiveCamera perspectiveCamera) {
-            perspectiveCamera.fieldOfView = (float) ((GameRendererAccessor) Minecraft.getInstance().gameRenderer).invokeGetFov(Minecraft.getInstance().gameRenderer.getMainCamera(), f, true);
-            camera.viewportWidth = Gdx.graphics.getWidth();
-            camera.viewportHeight = Gdx.graphics.getHeight();
-
-            FOG.color.set(fogColor);
-
-            GdxBlockEntityRenderer.environment.set(FOG);
-
-            camera.near = 0.05f;
-            camera.far = Minecraft.getInstance().gameRenderer.getDepthFar();
-
-            camera.position.set(-pos.x, -pos.y, -pos.z);
-            camera.direction.set(0, 0, -1);
-            camera.up.set(0, 1, 0);
-
-            pose.pose().getRotation(rotation);
-            camera.rotateAround(Vector3.Zero, tmp.set(rotation.x, rotation.y, rotation.z), rotation.angle);
-
-            float aspect = (float) Gdx.graphics.getWidth() / Gdx.graphics.getHeight();
-            camera.projection.setToProjection(Math.abs(camera.near), Math.abs(camera.far), perspectiveCamera.fieldOfView, aspect);
-            camera.view.setToTranslation(pos.x, pos.y, pos.z).rotateRad(rotation.x, rotation.y, rotation.z, rotation.angle);
-            camera.combined.set(camera.projection);
-            Matrix4.mul(camera.combined.val, camera.view.val);
-
-            camera.invProjectionView.set(camera.combined);
-            Matrix4.inv(camera.invProjectionView.val);
-            camera.frustum.update(camera.invProjectionView);
-        }
-        if (camera instanceof OrthographicCamera orthographicCamera) {
-            camera.viewportWidth = Gdx.graphics.getWidth();
-            camera.viewportHeight = Gdx.graphics.getHeight();
-
-            FOG.color.set(fogColor);
-
-            GdxBlockEntityRenderer.environment.set(FOG);
-
-            camera.near = 0f;
-            camera.far = 15000;
-
-            camera.position.set(-pos.x, -pos.y, -pos.z);
-            camera.direction.set(0, 0, -1);
-            camera.up.set(0, 1, 0);
-
-            pose.pose().getRotation(rotation);
-            camera.rotateAround(Vector3.Zero, tmp.set(rotation.x, rotation.y, rotation.z), rotation.angle);
-
-            float aspect = (float) Gdx.graphics.getWidth() / Gdx.graphics.getHeight();
-            camera.projection.setToOrtho(0, Gdx.graphics.getWidth(), 0, Gdx.graphics.getHeight(), Math.abs(camera.near), Math.abs(camera.far));
-            camera.view.setToTranslation(pos.x, pos.y, pos.z).rotateRad(rotation.x, rotation.y, rotation.z, rotation.angle);
-            camera.combined.set(camera.projection);
-            Matrix4.mul(camera.combined.val, camera.view.val);
-
-            camera.invProjectionView.set(camera.combined);
-            Matrix4.inv(camera.invProjectionView.val);
-            camera.frustum.update(camera.invProjectionView);
-        }
+    private static void renderExample(Gdx3DRenderSource<?> source) {
+        ModelBatch batch1 = source.getBatch();
+        batch1.render(cubeInstance, source.getEnvironment());
     }
 
     @Override

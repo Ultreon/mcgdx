@@ -7,6 +7,7 @@
     "DefaultLwjgl3InputMixin",
     "Lwjgl3GraphicsMixin",
     "Lwjgl3WindowMixin",
+    "ShaderProgramMixin",
     "accessors.DefaultLwjgl3InputAccessor",
     "accessors.Lwjgl3ApplicationAccessor",
     "accessors.Lwjgl3GraphicsAccessor",
@@ -20,6 +21,7 @@
     "MinecraftMixin",
     "MouseHandlerMixin",
     "accessors.GameRendererAccessor",
+    "accessors.LightTextureAccessor",
     "accessors.MinecraftAccessor"
   ],
   "injectors": {
