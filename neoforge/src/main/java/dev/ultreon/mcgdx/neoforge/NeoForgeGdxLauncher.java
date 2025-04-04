@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-package dev.ultreon.mcgdx.forge;
+package dev.ultreon.mcgdx.neoforge;
 
 import dev.ultreon.mcgdx.GdxMinecraft;
-import dev.ultreon.mcgdx.impl.forge.ForgeModLoader;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.loading.FMLEnvironment;
 
 @Mod(GdxMinecraft.MOD_ID)
-public class ForgeGdxLauncher {
-    public ForgeGdxLauncher() {
+public class NeoForgeGdxLauncher {
+    public NeoForgeGdxLauncher(ModContainer mod, IEventBus modEventBus) {
         if (FMLEnvironment.dist != Dist.CLIENT) return;
 
 //        GdxMinecraft.setup();
-        GdxMinecraft.loader = new ForgeModLoader();
+        GdxMinecraft.loader = new ForgeModLoader(mod, modEventBus);
     }
 }

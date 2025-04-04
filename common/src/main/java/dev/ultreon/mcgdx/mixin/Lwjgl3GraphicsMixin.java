@@ -60,7 +60,7 @@ public abstract class Lwjgl3GraphicsMixin implements Disposable, Graphics {
     }
 
     /**
-     * @author XyperCode
+     * @author Qubilux
      * @reason 
      */
     @Overwrite(remap = false)
@@ -75,7 +75,7 @@ public abstract class Lwjgl3GraphicsMixin implements Disposable, Graphics {
     }
 
     /**
-     * @author XyperCode
+     * @author Qubilux
      * @reason Minecraft manages the FPS, so we just get the fps from the Minecraft instance.
      */
     @Overwrite(remap = false)

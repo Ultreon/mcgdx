@@ -1,100 +1,44 @@
-/*
- * Copyright (c) 2024.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 plugins {
-    id "architectury-plugin" version "3.4-SNAPSHOT"
-    id "dev.architectury.loom" version "1.4-SNAPSHOT" apply false
-
-    id "maven-publish"
+    // see https://fabricmc.net/develop/ for new versions
+    id 'fabric-loom' version '1.7-SNAPSHOT' apply false
+    // see https://projects.neoforged.net/neoforged/moddevgradle for new versions
+    id 'net.neoforged.moddev' version '0.1.110' apply false
 }
 
-architectury {
-    minecraft = rootProject.minecraft_version
+mkdir file("build/tmp/javadoc/collect")
+mkdir file("build/docs/javadoc")
+
+evaluationDependsOn(":common")
+
+tasks.register("javadoc", Copy) {
+    dependsOn "common:javadoc"
+
+    doFirst {
+        mkdir file("build/docs/javadoc")
+    }
+
+    from(project(":common").javadoc.outputs)
+    into(file("build/docs/javadoc"))
 }
 
-subprojects {
-    apply plugin: "dev.architectury.loom"
+tasks.register("jar", Copy) {
+    dependsOn "common:build"
+    dependsOn "forge:build"
+    dependsOn "neoforge:build"
+    dependsOn "fabric:build"
 
-    loom {
-        silentMojangMappingsLicense()
+    doFirst {
+        mkdir file("build/libs")
     }
 
-    dependencies {
-        minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
-        // The following line declares the mojmap mappings, you may use other mappings as well
-        mappings loom.layered() {
-            officialMojangMappings()
-            parchment("org.parchmentmc.data:parchment-1.20.2:2023.12.10@zip")
-        }
-        // The following line declares the yarn mappings you may select this one as well.
-        // mappings "net.fabricmc:yarn:@YARN_MAPPINGS@:v2"
-    }
+    from(project(":common").jar.outputs)
+    from(project(":forge").jar.outputs)
+    from(project(":neoforge").jar.outputs)
+    from(project(":fabric").jar.outputs)
+    into(file("build/libs"))
 }
 
-allprojects {
-    apply plugin: "java"
-    apply plugin: "architectury-plugin"
-    apply plugin: "maven-publish"
-
-    archivesBaseName = rootProject.archives_base_name
-    version = rootProject.mod_version
-    group = rootProject.maven_group
-
-    repositories {
-        // Add repositories to retrieve artifacts from in here.
-        // You should only use this when depending on other mods because
-        // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-        // See https://docs.gradle.org/current/userguide/declaring_repositories.html
-        // for more information about repositories.
-
-        maven { url "https://jitpack.io/" }
-
-        maven {
-            name = 'ParchmentMC'
-            url = 'https://maven.parchmentmc.org'
-        }
-    }
-
-    tasks.withType(JavaCompile) {
-        options.encoding = "UTF-8"
-        options.release = 17
-    }
-
-    java {
-        withSourcesJar()
-    }
-}
-
-afterEvaluate {
-    javadoc {
-        source(subprojects.collect { subproject ->
-            subproject.sourceSets.main.allJava.sourceDirectories
-        })
-        title = "GDX Minecraft"
-        description = "A projecct aiming to have LibGDX support for Minecraft"
-        setDestinationDir(file("$rootProject.projectDir/build/docs/javadoc"))
-        // Configure the classpath
-        classpath = files(subprojects.collect { subproject ->
-            subproject.sourceSets.main.compileClasspath
-        })
-        (options as StandardJavadocDocletOptions).links(
-                "https://javadoc.io/doc/com.badlogicgames.gdx/gdx/${gdx_version}",
-                "https://javadoc.io/doc/com.badlogicgames.gdx/gdx-backend-lwjgl3/${gdx_version}",
-                "https://maven.fabricmc.net/docs/fabric-loader-${fabric_loader_version}",
-                "https://maven.fabricmc.net/docs/fabric-api-${fabric_api_version}",
-        )
-    }
+tasks.register("build") {
+    dependsOn "javadoc"
+    dependsOn "jar"
 }

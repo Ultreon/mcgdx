@@ -27,7 +27,7 @@ public abstract class DefaultLwjgl3InputMixin implements Disposable {
     @Shadow public abstract void resetPollingStates();
 
     /**
-     * @author XyperCode
+     * @author Qubilux
      * @reason Minecraft handles LWJGL3 input events by default.
      */
     @Overwrite(remap = false)

@@ -772,6 +772,6 @@ public class GdxEntityRenderer<T extends Entity> extends EntityRenderer<T> imple
 
     @Override
     public @NotNull ResourceLocation getTextureLocation(T entity) {
-        return new ResourceLocation("minecraft", "");
+        return ResourceLocation.fromNamespaceAndPath("minecraft", "");
     }
 }

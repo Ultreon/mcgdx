@@ -13,6 +13,8 @@ import dev.ultreon.mcgdx.mixin.accessors.GameRendererAccessor;
 import net.minecraft.client.Minecraft;
 
 public class CameraUtils {
+    private static float[] buffer = new float[16];
+
     public static void setupCamera(Camera camera, float f, PoseStack poseStack) {
         PoseStack.Pose pose = poseStack.last();
         pose.pose().getTranslation(GdxMinecraft.pos);
@@ -39,8 +41,7 @@ public class CameraUtils {
             float aspect = (float) Gdx.graphics.getWidth() / Gdx.graphics.getHeight();
             camera.projection.setToProjection(Math.abs(camera.near), Math.abs(camera.far), perspectiveCamera.fieldOfView, aspect);
             camera.view.setToTranslation(GdxMinecraft.pos.x, GdxMinecraft.pos.y, GdxMinecraft.pos.z).rotateRad(GdxMinecraft.rotation.x, GdxMinecraft.rotation.y, GdxMinecraft.rotation.z, GdxMinecraft.rotation.angle);
-            camera.combined.set(camera.projection);
-            Matrix4.mul(camera.combined.val, camera.view.val);
+            camera.combined.set(pose.pose().get(buffer));
 
             camera.invProjectionView.set(camera.combined);
             Matrix4.inv(camera.invProjectionView.val);

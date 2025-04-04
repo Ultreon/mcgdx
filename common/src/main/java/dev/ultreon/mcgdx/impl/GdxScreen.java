@@ -65,7 +65,12 @@ public class GdxScreen extends Screen {
         if (this.failure != null) {
             guiGraphics.fillGradient(0, 0, this.width, this.height, 0xff000000, 0xff200000);
             guiGraphics.drawCenteredString(super.font, "§lRender Failure", width / 2, height / 2 - 11, 0xffffffff);
-            guiGraphics.drawCenteredString(super.font, "§o" + failure.getMessage(), width / 2, height / 2 + 1, 0xffffffff);
+            String message = failure.getMessage();
+            int lineNr = 0;
+            for (String line : message.lines().toList()) {
+                guiGraphics.drawCenteredString(super.font, "§o" + line, width / 2, lineNr * super.font.lineHeight + height / 2 + 1, 0xffffffff);
+                lineNr++;
+            }
             return;
         }
 
@@ -111,8 +116,18 @@ public class GdxScreen extends Screen {
     }
 
     @Override
-    public final void renderDirtBackground(GuiGraphics guiGraphics) {
-        super.renderDirtBackground(guiGraphics);
+    protected final void renderPanorama(GuiGraphics pGuiGraphics, float pPartialTick) {
+        super.renderPanorama(pGuiGraphics, pPartialTick);
+    }
+
+    @Override
+    protected final void renderMenuBackground(GuiGraphics pPartialTick) {
+        super.renderMenuBackground(pPartialTick);
+    }
+
+    @Override
+    protected final void renderMenuBackground(GuiGraphics pGuiGraphics, int pX, int pY, int pWidth, int pHeight) {
+        super.renderMenuBackground(pGuiGraphics, pX, pY, pWidth, pHeight);
     }
 
     @Override
@@ -122,6 +137,11 @@ public class GdxScreen extends Screen {
 
     public void render(ShapeDrawer shapeDrawer, Batch batch, int i, int j, float f) {
         super.render(getMcGfx(), i, j, f); // Minecraft GUI component support.
+    }
+
+    @Override
+    protected final void renderBlurredBackground(float pPartialTick) {
+        super.renderBlurredBackground(pPartialTick);
     }
 
     GuiGraphics getMcGfx() {

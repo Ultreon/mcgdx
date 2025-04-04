@@ -22,6 +22,7 @@ import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
@@ -43,7 +44,7 @@ public class LevelRendererMixin {
 //    private final Vector3 mcgdx$tmp = new Vector3();
 
     @WrapMethod(method = "renderLevel")
-    public void mcgdx$wrapLevelRenderForWorldCubeMap(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, Operation<Void> original) {
+    public void mcgdx$wrapLevelRenderForWorldCubeMap(DeltaTracker pDeltaTracker, boolean pRenderBlockOutline, Camera pCamera, GameRenderer pGameRenderer, LightTexture pLightTexture, Matrix4f pFrustumMatrix, Matrix4f pProjectionMatrix, Operation<Void> original) {
 //        FrameBufferCubemap frameBuffer = GdxMinecraft.cubemapFBO;
 //
 //        GdxMinecraft.disableCubemapUsage = true;
@@ -86,7 +87,7 @@ public class LevelRendererMixin {
 //        }
 //        frameBuffer.end();
 //        GdxMinecraft.disableCubemapUsage = false;
-        original.call(poseStack, f, l, bl, camera, gameRenderer, lightTexture, matrix4f);
+        original.call(pDeltaTracker, pRenderBlockOutline, pCamera, pGameRenderer, pLightTexture, pFrustumMatrix, pProjectionMatrix);
 
 //        GdxMinecraft.cubeMap = frameBuffer.getColorBufferTexture();
     }

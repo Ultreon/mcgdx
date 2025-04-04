@@ -95,6 +95,6 @@ public class BlockEntityShader extends DefaultShader {
     }
 
     public static String createPrefix(final Renderable renderable, final Config config) {
-        return "#version 150\n" + DefaultShader.createPrefix(renderable, config);
+        return DefaultShader.createPrefix(renderable, config);
     }
 }

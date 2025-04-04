@@ -16,10 +16,7 @@
 
 package dev.ultreon.mcgdx;
 
-import com.badlogic.gdx.ApplicationListener;
-import com.badlogic.gdx.ApplicationLogger;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Version;
+import com.badlogic.gdx.*;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3WindowListener;
 import com.badlogic.gdx.graphics.*;
@@ -38,6 +35,7 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.GdxNativesLoader;
 import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.systems.RenderSystem;
 import dev.ultreon.mcgdx.api.Gdx3DRenderSource;
 import dev.ultreon.mcgdx.api.McGdx;
 import dev.ultreon.mcgdx.api.ModLoader;
@@ -53,6 +51,8 @@ import org.lwjgl.system.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import space.earlygrey.shapedrawer.ShapeDrawer;
+
+import java.io.File;
 
 @ApiStatus.Internal
 @SuppressWarnings("GDXJavaStaticResource")
@@ -89,7 +89,6 @@ public class GdxMinecraft implements ApplicationListener {
         instance = this;
         try {
             GdxNativesLoader.load();
-            GdxMinecraft.app = new MinecraftApplication(this, new MinecraftApplicationConfiguration(), Minecraft.getInstance());
             McGdx.blockEntityManager = new MinecraftBlockEntityManager();
 
             McGdx.blockEntityManager.register(new NamespaceID("mcgdx", "example"), GdxMinecraft::renderExample);
@@ -97,7 +96,7 @@ public class GdxMinecraft implements ApplicationListener {
             CrashReport libGDXCrash = new CrashReport("LibGDX failed to initialize", e);
             CrashReportCategory libGDX = libGDXCrash.addCategory("LibGDX");
             libGDX.setDetail("LibGDX Version", Version.VERSION);
-            Minecraft.crash(libGDXCrash);
+            Minecraft.crash(Minecraft.getInstance(), Minecraft.getInstance().gameDirectory, libGDXCrash);
         }
     }
 
@@ -114,6 +113,7 @@ public class GdxMinecraft implements ApplicationListener {
     }
 
     public static String toVert150(String vert120) {
+        vert120 = "#version 150\n" + vert120;
         vert120 = vert120.replace("\nattribute ", "\nin ");
         vert120 = vert120.replace(" attribute ", " in ");
 
@@ -126,6 +126,7 @@ public class GdxMinecraft implements ApplicationListener {
     }
 
     public static String toFrag150(String frag120) {
+        frag120 = "#version 150\n" + frag120;
         frag120 = frag120.replace("\nattribute ", "\nout ");
         frag120 = frag120.replace(" attribute ", " out ");
 
@@ -173,7 +174,7 @@ public class GdxMinecraft implements ApplicationListener {
                             + "}";
 
     public static void initialize() {
-        batch = new SpriteBatch(1000, new ShaderProgram(toVert150(toVert150(vertexShader)), toFrag150(fragmentShader)));
+        batch = new SpriteBatch(1000, new ShaderProgram(vertexShader, fragmentShader));
         Pixmap whitePix = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         whitePix.drawPixel(0, 0, 0xffffffff);
         Texture white = new Texture(whitePix, true);
@@ -194,11 +195,20 @@ public class GdxMinecraft implements ApplicationListener {
         if (instance == null) {
             instance = new GdxMinecraft();
         }
+
+        GdxMinecraft.loader.load();
     }
 
     private static void renderExample(Gdx3DRenderSource<?> source) {
         ModelBatch batch1 = source.getBatch();
         batch1.render(cubeInstance, source.getEnvironment());
+    }
+
+    public static MinecraftApplication getApp() {
+        if (app == null) {
+            GdxMinecraft.app = new MinecraftApplication(instance(), new MinecraftApplicationConfiguration(), Minecraft.getInstance());
+        }
+        return app;
     }
 
     @Override

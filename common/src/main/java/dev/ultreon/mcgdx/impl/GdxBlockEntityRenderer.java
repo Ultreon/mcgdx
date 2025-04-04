@@ -694,7 +694,7 @@ public class GdxBlockEntityRenderer implements BlockEntityRenderer<GdxBlockEntit
     private final Minecraft mc = Minecraft.getInstance();
     private final RenderState renderState = new RenderState();
 
-    public GdxBlockEntityRenderer(BlockEntityRendererProvider.Context context, Gdx3DRenderable renderable) {
+    public GdxBlockEntityRenderer(Gdx3DRenderable renderable) {
         this.renderable = renderable;
 
         environment.set(ColorAttribute.createAmbientLight(1, 1, 1, 1));

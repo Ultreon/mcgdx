@@ -27,6 +27,6 @@ import net.minecraft.resources.ResourceLocation;
 public class MinecraftBlockEntityManager implements BlockEntityManager {
     @Override
     public void register(NamespaceID id, Gdx3DRenderable source) {
-        GdxMinecraft.loader.register(new ResourceLocation(id.domain(), id.namespace()), source);
+        GdxMinecraft.loader.register(ResourceLocation.fromNamespaceAndPath(id.domain(), id.namespace()), source);
     }
 }

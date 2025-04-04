@@ -14,29 +14,22 @@
  * limitations under the License.
  */
 
-package dev.ultreon.mcgdx.impl.fabric;
+package dev.ultreon.mcgdx.fabric;
 
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import dev.architectury.registry.client.level.entity.EntityRendererRegistry;
-import dev.architectury.registry.client.rendering.BlockEntityRendererRegistry;
-import dev.architectury.registry.item.ItemPropertiesRegistry;
 import dev.ultreon.mcgdx.GdxMinecraft;
 import dev.ultreon.mcgdx.api.GameEnvironment;
 import dev.ultreon.mcgdx.api.ModLoader;
 import dev.ultreon.mcgdx.impl.Gdx3DRenderable;
 import dev.ultreon.mcgdx.impl.GdxBlockEntity;
 import dev.ultreon.mcgdx.impl.GdxBlockEntityRenderer;
+import dev.ultreon.mods.xinexlib.platform.XinexPlatform;
+import dev.ultreon.mods.xinexlib.registrar.RegistrySupplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
-import net.fabricmc.fabric.impl.client.rendering.BlockEntityRendererRegistryImpl;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -53,8 +46,8 @@ import java.util.*;
 
 public class FabricModLoader implements ModLoader {
     private final Map<ResourceLocation, BlockEntity> registeredBlockEntities = new HashMap<>();
-    private final List<Item> items = new ArrayList<>();;
-    private final ResourceKey<CreativeModeTab> tab = ResourceKey.create(Registries.CREATIVE_MODE_TAB, new ResourceLocation("mcgdx", "mcgdx"));
+    private final ResourceKey<CreativeModeTab> tab = ResourceKey.create(Registries.CREATIVE_MODE_TAB, ResourceLocation.fromNamespaceAndPath("mcgdx", "mcgdx"));
+    private final List<Runnable> clientLoaders = new ArrayList<>();
 
     public FabricModLoader() {
         CreativeModeTab build = FabricItemGroup.builder().title(Component.literal("mcGDX")).icon(() -> new ItemStack(Items.ITEM_FRAME)).build();
@@ -87,28 +80,38 @@ public class FabricModLoader implements ModLoader {
 
     @Override
     public void register(ResourceLocation resourceLocation, Gdx3DRenderable source) {
-        var ref = new BlockEntityTemp();
-        ref.blockEntity = new BlockEntityType<>((blockPos, blockState) -> new GdxBlockEntity(ref.blockEntity, blockPos, blockState), Set.of(ref.block), null);
+        var ref = new BlockEntityTemp(resourceLocation);
+        ref.blockEntity = (RegistrySupplier<BlockEntityType<GdxBlockEntity>, BlockEntityType<GdxBlockEntity>>)(RegistrySupplier) FabricRegistration.BLOCK_ENTITY.register(resourceLocation.getPath(), () -> new BlockEntityType<GdxBlockEntity>((blockPos, blockState) -> new GdxBlockEntity(ref.blockEntity.get(), blockPos, blockState), Set.of(ref.block.get()), null));
 
-        Registry.register(BuiltInRegistries.BLOCK, resourceLocation, ref.block);
-        Registry.register(BuiltInRegistries.ITEM, resourceLocation, ref.item);
-        Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, resourceLocation, ref.blockEntity);
-
-        this.items.add(ref.item);
-
-        if (getEnvironmentType() == GameEnvironment.CLIENT) {
-            BlockEntityRendererRegistryImpl.register(ref.blockEntity, context -> new GdxBlockEntityRenderer(context, source));
-        }
+        this.clientLoaders.add(() -> {
+            if (getEnvironmentType() == GameEnvironment.CLIENT) {
+                XinexPlatform.client().entityRenderers().register(ref.blockEntity, context -> new GdxBlockEntityRenderer(source));
+            }
+        });
 
         ItemGroupEvents.modifyEntriesEvent(tab).register(entries -> {
-            entries.accept(ref.item);
+            entries.accept(ref.item.get());
         });
     }
 
-    private static class BlockEntityTemp {
-        BlockEntityType<GdxBlockEntity> blockEntity = null;
-        Block block = new GdxEntityBlock(BlockBehaviour.Properties.of().noCollission(), () -> blockEntity);
+    @Override
+    public void load() {
+        FabricRegistration.load();
 
-        Item item = new BlockItem(block, new Item.Properties());
+        for (Runnable runnable : this.clientLoaders) {
+            runnable.run();
+        }
+    }
+
+    private static class BlockEntityTemp {
+        RegistrySupplier<BlockEntityType<GdxBlockEntity>, BlockEntityType<GdxBlockEntity>> blockEntity = null;
+        RegistrySupplier<GdxEntityBlock, Block> block;
+
+        RegistrySupplier<BlockItem, Item> item;
+
+        private BlockEntityTemp(ResourceLocation name) {
+            block = FabricRegistration.BLOCK.register(name.getPath(), () -> new GdxEntityBlock(BlockBehaviour.Properties.of().noCollission(), () -> blockEntity.get()));
+            item = FabricRegistration.ITEM.register(name.getPath(), () -> new BlockItem(block.get(), new Item.Properties()));
+        }
     }
 }

@@ -17,15 +17,13 @@
 package dev.ultreon.mcgdx.fabric;
 
 import dev.ultreon.mcgdx.GdxMinecraft;
-import dev.ultreon.mcgdx.impl.fabric.FabricModLoader;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 
 public class FabricGdxLauncher implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
 //        GdxMinecraft.setup();
         GdxMinecraft.loader = new FabricModLoader();
+        GdxMinecraft.init();
     }
 }

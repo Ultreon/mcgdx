@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.ultreon.mcgdx.impl.forge;
+package dev.ultreon.mcgdx.neoforge;
 
 import com.badlogic.gdx.files.FileHandle;
 import dev.ultreon.mcgdx.GdxMinecraft;
@@ -30,28 +30,25 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class ForgeModLoader implements ModLoader {
-    private final DeferredRegister<Block> blockRegistry = DeferredRegister.create(ForgeRegistries.BLOCKS, GdxMinecraft.MOD_ID);
-    private final DeferredRegister<BlockEntityType<?>> blockEntityTypeRegistry = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, GdxMinecraft.MOD_ID);
-    private final DeferredRegister<Item> itemRegistry = DeferredRegister.create(ForgeRegistries.ITEMS, GdxMinecraft.MOD_ID);
+    private final DeferredRegister<Block> blockRegistry = DeferredRegister.create(Registries.BLOCK, GdxMinecraft.MOD_ID);
+    private final DeferredRegister<BlockEntityType<?>> blockEntityTypeRegistry = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, GdxMinecraft.MOD_ID);
+    private final DeferredRegister<Item> itemRegistry = DeferredRegister.create(Registries.ITEM, GdxMinecraft.MOD_ID);
     private final DeferredRegister<CreativeModeTab> creativeModeTabRegistry = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, GdxMinecraft.MOD_ID);
-    private final RegistryObject<CreativeModeTab> tab;
+    private final DeferredHolder<CreativeModeTab, CreativeModeTab> tab;
 
-    public ForgeModLoader() {
+    public ForgeModLoader(ModContainer mod, IEventBus modEventBus) {
         tab = creativeModeTabRegistry.register("mcgdx", () -> CreativeModeTab.builder().title(Component.literal("mcGDX")).icon(() -> new ItemStack(Items.ITEM_FRAME)).build());
 
-        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         blockRegistry.register(modEventBus);
         blockEntityTypeRegistry.register(modEventBus);
         itemRegistry.register(modEventBus);
@@ -86,11 +83,16 @@ public class ForgeModLoader implements ModLoader {
 
     }
 
+    @Override
+    public void load() {
+
+    }
+
     public void buildCreativeTabs(BuildCreativeModeTabContentsEvent event) {
         CreativeModeTab tab1 = event.getTab();
         if (tab.get().equals(tab1)) {
             for (var e : itemRegistry.getEntries()) {
-                event.accept(e);
+                event.accept(e.get());
             }
         }
     }

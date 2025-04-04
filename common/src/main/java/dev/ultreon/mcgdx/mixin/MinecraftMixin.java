@@ -44,13 +44,13 @@ public abstract class MinecraftMixin {
     @Shadow @Final
     private Window window;
 
-    @Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V", shift = At.Shift.AFTER))
+    @Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;render(Lnet/minecraft/client/DeltaTracker;Z)V", shift = At.Shift.AFTER))
     private void createTickProfiler(CallbackInfo ci) {
         GdxMinecraft.app.update();
     }
 
     /**
-     * @author XyperCode
+     * @author Qubilux
      * @reason Minecraft breaks with LibGDX if the framerate limit is set.
      */
     @Overwrite

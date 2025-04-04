@@ -27,4 +27,5 @@ public interface ModLoader {
 
     void register(ResourceLocation resourceLocation, Gdx3DRenderable source);
 
+    void load();
 }

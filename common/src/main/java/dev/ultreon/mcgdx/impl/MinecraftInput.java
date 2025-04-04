@@ -16,7 +16,7 @@
 
 package dev.ultreon.mcgdx.impl;
 
-import dev.ultreon.mcgdx.GdxMinecraft;
+import com.badlogic.gdx.input.NativeInputConfiguration;
 import org.lwjgl.glfw.*;
 
 import com.badlogic.gdx.AbstractInput;
@@ -630,6 +630,21 @@ public class MinecraftInput extends AbstractInput {
 
 	@Override
     public void setOnscreenKeyboardVisible (boolean visible, OnscreenKeyboardType type) {
+	}
+
+	@Override
+	public void openTextInputField(NativeInputConfiguration configuration) {
+		// Todo
+	}
+
+	@Override
+	public void closeTextInputField(boolean sendReturn) {
+		// Todo
+	}
+
+	@Override
+	public void setKeyboardHeightObserver(KeyboardHeightObserver observer) {
+		// Todo
 	}
 
 	@Override

@@ -30,8 +30,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class McWindowMixin {
     @Inject(method = "setIcon", at = @At("HEAD"), cancellable = true)
     private void gdx_minecraft$injectSetIcon(PackResources packResources, IconSet iconSet, CallbackInfo ci) {
-        GdxMinecraft.init();
-        GdxMinecraft.app.getGraphics().getWindow().setWin((Window) (Object) this);
+        GdxMinecraft.getApp().getGraphics().getWindow().setWin((Window) (Object) this);
         ci.cancel();
     }
 }
