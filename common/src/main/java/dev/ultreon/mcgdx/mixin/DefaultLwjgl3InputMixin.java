@@ -26,10 +26,6 @@ import org.spongepowered.asm.mixin.Shadow;
 public abstract class DefaultLwjgl3InputMixin implements Disposable {
     @Shadow public abstract void resetPollingStates();
 
-    /**
-     * @author Qubilux
-     * @reason Minecraft handles LWJGL3 input events by default.
-     */
     @Overwrite(remap = false)
     public void windowHandleChanged(long windowHandle) {
         resetPollingStates();
